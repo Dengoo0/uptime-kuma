@@ -1632,14 +1632,15 @@ class Monitor extends BeanModel {
 
         let sent = false;
         log.debug("monitor", "Send certificate notification");
-
+        // Get all tags for this monitor
+        const tags = await this.getTags();
+        const tagNames = tags.map(tag => tag.name).join(", ");
+        const tagsText = tagNames ? ` (Tags: ${tagNames})` : "";
         for (let notification of notificationList) {
             try {
                 log.debug("monitor", "Sending to " + notification.name);
-                await Notification.send(
-                    JSON.parse(notification.config),
-                    `[${this.name}][${this.url}] ${certType} certificate ${certCN} will expire in ${daysRemaining} days`
-                );
+                await Notification.send(JSON.parse(notification.config), 
+                `[${this.name}][${this.url}]${tagsText} ${certType} certificate ${certCN} will expire in ${daysRemaining} days`);
                 sent = true;
             } catch (e) {
                 log.error("monitor", "Cannot send cert notification to " + notification.name);
